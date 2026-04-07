@@ -14,7 +14,7 @@ Core Features
 
 ---
 
-## ## Technical Stack
+## Technical Stack
 
 * **Frontend**: HTML5, CSS3 (Custom "Cinzel" Dark Theme), and Vanilla JavaScript.
 * **Backend**: Python with the Flask web framework.
@@ -23,7 +23,7 @@ Core Features
 
 ---
 
-## ## Database Schema
+## Database Schema
 
 The system utilizes a relational SQLite database with the following structure:
 
@@ -36,7 +36,7 @@ The system utilizes a relational SQLite database with the following structure:
 
 ---
 
-## ## Getting Started
+## Getting Started
 
 1.  **Install Dependencies**:
     ```bash
@@ -51,5 +51,5 @@ The system utilizes a relational SQLite database with the following structure:
 
 ---
 
-## ## Development Note 
+## Development Note 
 This project is currently in active development, focusing on enhancing the **grouping and scatter analysis** engine to provide deeper insights into shot consistency trends across multiple training sessions. 
