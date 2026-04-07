@@ -1,12 +1,12 @@
-# [cite_start]ArcTrack: Archery Performance Tracker [cite: 31]
+ArcTrack: Archery Performance Tracker
 
-[cite_start]**ArcTrack** is a full-stack web application designed for archers to log training sessions, manage equipment, and visualize performance trends over time. [cite: 32] [cite_start]The platform focuses on data-driven improvement by tracking shot accuracy and consistency across different environments and gear configurations. [cite: 33]
+**ArcTrack** is a full-stack web application designed for archers to log training sessions, manage equipment, and visualize performance trends over time. The platform focuses on data-driven improvement by tracking shot accuracy and consistency across different environments and gear configurations. 
 
 ---
 
-## [cite_start]## Core Features [cite: 32, 33]
+Core Features
 
-* [cite_start]**Session Management**: Log training dates, locations, weather conditions, and shooting distances. [cite: 32]
+* **Session Management**: Log training dates, locations, weather conditions, and shooting distances. 
 * **End-by-End Logging**: Record scores, arrow counts, and grouping measurements (in cm) for every "end" within a session.
 * **Equipment Tracking**: Maintain a digital inventory of bows, arrows, and accessories to see how specific gear affects your performance.
 * **Performance Analytics**: Automated calculation of total scores, average end scores, and shot dispersion (grouping) trends.
@@ -14,7 +14,7 @@
 
 ---
 
-## [cite_start]## Technical Stack [cite: 6, 8, 32]
+## ## Technical Stack
 
 * **Frontend**: HTML5, CSS3 (Custom "Cinzel" Dark Theme), and Vanilla JavaScript.
 * **Backend**: Python with the Flask web framework.
@@ -51,5 +51,5 @@ The system utilizes a relational SQLite database with the following structure:
 
 ---
 
-## [cite_start]## Development Note [cite: 32]
-[cite_start]This project is currently in active development, focusing on enhancing the **grouping and scatter analysis** engine to provide deeper insights into shot consistency trends across multiple training sessions. [cite: 33]
+## ## Development Note 
+This project is currently in active development, focusing on enhancing the **grouping and scatter analysis** engine to provide deeper insights into shot consistency trends across multiple training sessions. 
