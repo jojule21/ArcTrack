@@ -1,55 +1,50 @@
-ArcTrack: Archery Performance Tracker
+# ArcTrack: Archery Performance Tracker
 
-**ArcTrack** is a full-stack web application designed for archers to log training sessions, manage equipment, and visualize performance trends over time. The platform focuses on data-driven improvement by tracking shot accuracy and consistency across different environments and gear configurations. 
+**ArcTrack** is a full-stack web application for archers to log training sessions, manage equipment, and visualize performance trends over time. The platform focuses on data-driven improvement by tracking shot accuracy and consistency across different environments and gear configurations.
 
----
+<!-- TODO: add a screenshot — this is a visual project, show the charts!
+![Dashboard](docs/screenshot_dashboard.png)
+-->
 
-Core Features
+## Core Features
 
-* **Session Management**: Log training dates, locations, weather conditions, and shooting distances. 
-* **End-by-End Logging**: Record scores, arrow counts, and grouping measurements (in cm) for every "end" within a session.
-* **Equipment Tracking**: Maintain a digital inventory of bows, arrows, and accessories to see how specific gear affects your performance.
-* **Performance Analytics**: Automated calculation of total scores, average end scores, and shot dispersion (grouping) trends.
-* **Data Visualization**: Real-time dashboard featuring progression charts for scores and grouping consistency using custom canvas-based rendering.
-
----
+- **Session Management** — log training dates, locations, weather conditions, and shooting distances.
+- **End-by-End Logging** — record scores, arrow counts, and grouping measurements (cm) for every end within a session.
+- **Equipment Tracking** — maintain a digital inventory of bows, arrows, and accessories to see how gear affects performance.
+- **Performance Analytics** — automated total scores, average end scores, and shot-dispersion (grouping) trends.
+- **Data Visualization** — real-time dashboard with custom canvas-based progression charts.
 
 ## Technical Stack
 
-* **Frontend**: HTML5, CSS3 (Custom "Cinzel" Dark Theme), and Vanilla JavaScript.
-* **Backend**: Python with the Flask web framework.
-* **Database**: SQLite for persistent storage of sessions, equipment, and performance data.
-* **API**: RESTful JSON endpoints for seamless communication between the frontend and the database.
+- **Backend:** Python / Flask with a RESTful JSON API
+- **Database:** SQLite (4-table relational schema: `equipment`, `sessions`, `ends`, `personal_bests`)
+- **Frontend:** HTML5, CSS3, vanilla JavaScript with custom canvas rendering
 
----
+## API
 
-## Database Schema
-
-The system utilizes a relational SQLite database with the following structure:
-
-| Table | Description |
-| :--- | :--- |
-| **`equipment`** | Stores gear details like name, type (bow/arrow), brand, and technical notes. |
-| **`sessions`** | Tracks high-level training data including date, location, and equipment used. |
-| **`ends`** | Contains individual round data: scores, arrow counts, and grouping metrics. |
-| **`personal_bests`** | Automatically logs record-breaking achievements in various categories. |
-
----
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET/POST | `/api/sessions` | List / create training sessions |
+| DELETE | `/api/sessions/<id>` | Delete a session |
+| GET/POST | `/api/sessions/<id>/ends` | List / log ends (auto-numbered) |
+| DELETE | `/api/ends/<id>` | Delete an end |
+| GET/POST | `/api/equipment` | List / add equipment |
+| DELETE | `/api/equipment/<id>` | Remove equipment |
+| GET | `/api/stats` | Aggregate stats + chart series |
 
 ## Getting Started
 
-1.  **Install Dependencies**:
-    ```bash
-    pip install flask
-    ```
-2.  **Run the Application**:
-    ```bash
-    python app.py
-    ```
-3.  **Access the Tracker**:
-    Navigate to `http://localhost:5050` in your web browser.
+```bash
+pip install -r requirements.txt
+python app.py
+# open http://localhost:5050
+```
 
----
+## Tests
 
-## Development Note 
-This project is currently in active development, focusing on enhancing the **grouping and scatter analysis** engine to provide deeper insights into shot consistency trends across multiple training sessions. 
+```bash
+pip install pytest
+pytest
+```
+
+Tests run against a temporary database and cover the sessions, ends, equipment, and stats endpoints. CI runs them on every push via GitHub Actions.
