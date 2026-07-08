@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArcTrack — Archery Performance Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14120f; --panel: #1e1a15; --panel2: #262119; --line: #3a3226;
+    --gold: #c9a24b; --gold-dim: #8a7239; --text: #e8e0d0; --muted: #9a8f7a;
+    --green: #7fb069; --red: #c05746;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: Inter, sans-serif; padding: 24px; }
+  h1 { font-family: Cinzel, serif; color: var(--gold); letter-spacing: 2px; font-size: 1.9rem; }
+  h1 span { color: var(--muted); font-size: 1rem; letter-spacing: 1px; display: block; font-family: Inter; }
+  h2 { font-family: Cinzel, serif; color: var(--gold); font-size: 1.05rem; letter-spacing: 1px;
+       border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 12px; }
+  main { max-width: 1100px; margin: 0 auto; display: grid; gap: 20px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+  .stat { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 12px; text-align: center; }
+  .stat .v { font-size: 1.5rem; font-weight: 600; color: var(--gold); }
+  .stat .l { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }
+  canvas { width: 100%; background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { color: var(--muted); text-align: left; font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 7px 8px; border-bottom: 1px solid #2a251c; }
+  tr.sel td { background: #2c2618; }
+  tr[data-sid] { cursor: pointer; }
+  form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  input, select { background: var(--panel2); border: 1px solid var(--line); color: var(--text);
+                  border-radius: 6px; padding: 7px 9px; font: inherit; font-size: .85rem; }
+  input:focus, select:focus { outline: 1px solid var(--gold-dim); }
+  button { background: var(--gold); color: #1a160f; border: 0; border-radius: 6px; padding: 7px 14px;
+           font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
+  button:hover { background: #dab55c; }
+  button.del { background: none; color: var(--red); padding: 2px 6px; font-size: .8rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  #endsPanel { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🏹 ARCTRACK <span>Archery Performance Tracker</span></h1>
+
+  <section>
+    <h2>Overview</h2>
+    <div class="stat-grid" id="stats"></div>
+  </section>
+
+  <section>
+    <h2>Progression</h2>
+    <div class="charts">
+      <div><canvas id="scoreChart" height="220"></canvas><p class="muted" style="margin-top:6px">Session total score (higher is better)</p></div>
+      <div><canvas id="groupChart" height="220"></canvas><p class="muted" style="margin-top:6px">Avg grouping in cm (lower is tighter)</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sessions</h2>
+    <table id="sessionsTable">
+      <thead><tr><th>Date</th><th>Location</th><th>Dist</th><th>Bow</th><th>Ends</th><th>Total</th><th>Avg grp</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <form id="sessionForm">
+      <input name="date" type="date" required>
+      <input name="location" placeholder="Location">
+      <input name="weather" placeholder="Weather">
+      <input name="distance_m" type="number" placeholder="Distance (m)" style="width:110px">
+      <select name="bow_id" id="bowSelect"><option value="">Bow…</option></select>
+      <select name="arrow_id" id="arrowSelect"><option value="">Arrows…</option></select>
+      <button>Add session</button>
+    </form>
+  </section>
+
+  <section id="endsPanel">
+    <h2 id="endsTitle">Ends</h2>
+    <table id="endsTable">
+      <thead><tr><th>#</th><th>Arrows</th><th>Score</th><th>Grouping (cm)</th><th>Notes</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <form id="endForm">
+      <input name="score" type="number" placeholder="Score" required style="width:90px">
+      <input name="arrows" type="number" placeholder="Arrows (6)" style="width:100px">
+      <input name="grouping_cm" type="number" step="0.1" placeholder="Grouping cm" style="width:120px">
+      <input name="notes" placeholder="Notes">
+      <button>Log end</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Equipment</h2>
+    <table id="equipTable">
+      <thead><tr><th>Name</th><th>Type</th><th>Brand</th><th>Notes</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <form id="equipForm">
+      <input name="name" placeholder="Name" required>
+      <select name="type"><option>bow</option><option>arrow</option><option>sight</option><option>other</option></select>
+      <input name="brand" placeholder="Brand">
+      <input name="notes" placeholder="Notes">
+      <button>Add equipment</button>
+    </form>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const api = (path, opts) => fetch('/api' + path, opts).then(r => r.json());
+const post = (path, body) => api(path, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+const del  = path => api(path, { method: 'DELETE' });
+let selectedSession = null;
+
+// ---------- Canvas charts (custom rendering, no libraries) ----------
+function drawChart(canvas, points, { label, color, invert = false }) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.getAttribute('height');
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+  const P = { l: 40, r: 12, t: 14, b: 26 };
+
+  if (points.length < 2) {
+    ctx.fillStyle = '#9a8f7a'; ctx.font = '13px Inter';
+    ctx.fillText('Log at least two sessions to see trends', P.l, H / 2);
+    return;
+  }
+  const vals = points.map(p => p.v);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const pad = (max - min) * 0.15 || 1;
+  const lo = min - pad, hi = max + pad;
+  const x = i => P.l + (W - P.l - P.r) * i / (points.length - 1);
+  const y = v => P.t + (H - P.t - P.b) * (1 - (v - lo) / (hi - lo));
+
+  // gridlines + axis labels
+  ctx.strokeStyle = '#3a3226'; ctx.fillStyle = '#9a8f7a'; ctx.font = '10px Inter'; ctx.lineWidth = 1;
+  for (let g = 0; g <= 3; g++) {
+    const v = lo + (hi - lo) * g / 3, gy = y(v);
+    ctx.beginPath(); ctx.moveTo(P.l, gy); ctx.lineTo(W - P.r, gy); ctx.stroke();
+    ctx.fillText(v.toFixed(v < 20 ? 1 : 0), 4, gy + 3);
+  }
+  // line
+  ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+  points.forEach((p, i) => i ? ctx.lineTo(x(i), y(p.v)) : ctx.moveTo(x(0), y(p.v)));
+  ctx.stroke();
+  // points + best marker
+  const bestV = invert ? Math.min(...vals) : Math.max(...vals);
+  points.forEach((p, i) => {
+    ctx.beginPath(); ctx.arc(x(i), y(p.v), p.v === bestV ? 5 : 3, 0, 7);
+    ctx.fillStyle = p.v === bestV ? '#c9a24b' : color; ctx.fill();
+  });
+  // x labels (first, middle, last)
+  ctx.fillStyle = '#9a8f7a';
+  [0, Math.floor(points.length / 2), points.length - 1].forEach(i => {
+    ctx.fillText(points[i].d.slice(5), x(i) - 14, H - 8);
+  });
+  ctx.fillStyle = color; ctx.font = '11px Inter'; ctx.fillText(label, P.l, 10);
+}
+
+// ---------- Renderers ----------
+async function loadStats() {
+  const s = await api('/stats');
+  const t = s.totals;
+  $('#stats').innerHTML = [
+    [t.total_sessions, 'Sessions'], [t.total_ends, 'Ends'], [t.total_score, 'Total score'],
+    [t.best_end, 'Best end'], [(+t.avg_end_score).toFixed(1), 'Avg end'],
+    [(+t.avg_grouping).toFixed(1) + ' cm', 'Avg grouping'],
+  ].map(([v, l]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+
+  const chart = s.sessions_chart || [];
+  drawChart($('#scoreChart'), chart.map(c => ({ d: c.date, v: +c.total })), { label: 'Total score', color: '#7fb069' });
+  drawChart($('#groupChart'), chart.filter(c => c.avg_group > 0).map(c => ({ d: c.date, v: +c.avg_group })),
+            { label: 'Avg grouping (cm)', color: '#c05746', invert: true });
+}
+
+async function loadSessions() {
+  const rows = await api('/sessions');
+  $('#sessionsTable tbody').innerHTML = rows.map(r => `
+    <tr data-sid="${r.id}" class="${r.id === selectedSession ? 'sel' : ''}">
+      <td>${r.date}</td><td>${r.location || '—'}</td><td>${r.distance_m ? r.distance_m + 'm' : '—'}</td>
+      <td>${r.bow_name || '—'}</td><td>${r.end_count}</td><td>${r.total_score}</td>
+      <td>${r.avg_grouping ? (+r.avg_grouping).toFixed(1) : '—'}</td>
+      <td><button class="del" data-delsid="${r.id}">✕</button></td>
+    </tr>`).join('');
+}
+
+async function loadEnds() {
+  if (!selectedSession) { $('#endsPanel').style.display = 'none'; return; }
+  $('#endsPanel').style.display = 'block';
+  const ends = await api(`/sessions/${selectedSession}/ends`);
+  $('#endsTitle').textContent = `Ends — session #${selectedSession}`;
+  $('#endsTable tbody').innerHTML = ends.map(e => `
+    <tr><td>${e.end_number}</td><td>${e.arrows}</td><td>${e.score}</td>
+        <td>${e.grouping_cm ?? '—'}</td><td>${e.notes || ''}</td>
+        <td><button class="del" data-deleid="${e.id}">✕</button></td></tr>`).join('');
+}
+
+async function loadEquipment() {
+  const items = await api('/equipment');
+  $('#equipTable tbody').innerHTML = items.map(e => `
+    <tr><td>${e.name}</td><td>${e.type}</td><td>${e.brand || '—'}</td><td>${e.notes || ''}</td>
+        <td><button class="del" data-deleqid="${e.id}">✕</button></td></tr>`).join('');
+  const opts = t => '<option value="">' + t + '…</option>' +
+    items.filter(i => i.type === (t === 'Bow' ? 'bow' : 'arrow'))
+         .map(i => `<option value="${i.id}">${i.name}</option>`).join('');
+  $('#bowSelect').innerHTML = opts('Bow');
+  $('#arrowSelect').innerHTML = opts('Arrows');
+}
+
+const refresh = () => Promise.all([loadStats(), loadSessions(), loadEnds(), loadEquipment()]);
+
+// ---------- Events ----------
+const formData = f => Object.fromEntries([...new FormData(f)].filter(([, v]) => v !== ''));
+
+$('#sessionForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = await post('/sessions', formData(e.target));
+  selectedSession = r.id; e.target.reset(); refresh();
+});
+$('#endForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  await post(`/sessions/${selectedSession}/ends`, formData(e.target));
+  e.target.reset(); refresh();
+});
+$('#equipForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  await post('/equipment', formData(e.target));
+  e.target.reset(); refresh();
+});
+document.addEventListener('click', async e => {
+  const b = e.target;
+  if (b.dataset.delsid)      { await del(`/sessions/${b.dataset.delsid}`); if (+b.dataset.delsid === selectedSession) selectedSession = null; }
+  else if (b.dataset.deleid) { await del(`/ends/${b.dataset.deleid}`); }
+  else if (b.dataset.deleqid){ await del(`/equipment/${b.dataset.deleqid}`); }
+  else { const tr = b.closest('tr[data-sid]'); if (tr) { selectedSession = +tr.dataset.sid; loadSessions(); loadEnds(); } return; }
+  refresh();
+});
+window.addEventListener('resize', loadStats);
+refresh();
+</script>
+</body>
+</html>
